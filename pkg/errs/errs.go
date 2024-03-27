@@ -1,5 +1,7 @@
 package errs
 
+var ErrNotFound = New("not found")
+
 type Err struct {
 	Message string `json:"message"`
 }

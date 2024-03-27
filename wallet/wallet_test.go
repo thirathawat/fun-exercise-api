@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/errs"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/testkit"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/timekit"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
@@ -230,6 +231,131 @@ func (s *WalletTestSuite) TestCreateWallet() {
 
 		s.Equal(http.StatusInternalServerError, rec.Code)
 		s.Contains(rec.Body.String(), "error creating wallet")
+	})
+}
+
+func (s *WalletTestSuite) TestUpdateWallet() {
+	s.Run("given invalid content type should return 400 and error message", func() {
+		rec := testkit.DoEchoRequest(
+			s.handler.UpdateWallet,
+			httptest.NewRequest(http.MethodPut, "/api/v1/wallets/1", testkit.JSONReader(s.T(), wallet.Request{
+				UserID:     1,
+				UserName:   "Thirathawat",
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			})),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusBadRequest, rec.Code)
+		s.Equal(`{"message":"code=415, message=Unsupported Media Type"}`, strings.TrimSpace(rec.Body.String()))
+	})
+
+	s.Run("given invalid request should return 400 and error message", func() {
+		rec := testkit.DoEchoRequest(
+			s.handler.UpdateWallet,
+			httptest.NewRequest(http.MethodPut, "/api/v1/wallets/1", testkit.JSONReader(s.T(), wallet.Request{
+				UserID:     1,
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			})),
+			testkit.WithJSONContentType(),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusBadRequest, rec.Code)
+		s.Equal(`{"message":"Key: 'Request.UserName' Error:Field validation for 'UserName' failed on the 'required' tag"}`, strings.TrimSpace(rec.Body.String()))
+	})
+
+	s.Run("given unable to update wallet should return 500 and error message", func() {
+		s.mockStore.EXPECT().
+			UpdateOne(&wallet.Wallet{
+				ID:         1,
+				UserID:     1,
+				UserName:   "Thirathawat",
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			}).
+			Return(errors.New("error updating wallet"))
+
+		rec := testkit.DoEchoRequest(
+			s.handler.UpdateWallet,
+			httptest.NewRequest(http.MethodPut, "/api/v1/wallets/1", testkit.JSONReader(s.T(), wallet.Request{
+				ID:         1,
+				UserID:     1,
+				UserName:   "Thirathawat",
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			})),
+			testkit.WithJSONContentType(),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusInternalServerError, rec.Code)
+		s.Contains(rec.Body.String(), "error updating wallet")
+	})
+
+	s.Run("given wallet not found should return 404 and error message", func() {
+		s.mockStore.EXPECT().
+			UpdateOne(&wallet.Wallet{
+				ID:         1,
+				UserID:     1,
+				UserName:   "Thirathawat",
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			}).
+			Return(errs.ErrNotFound)
+
+		rec := testkit.DoEchoRequest(
+			s.handler.UpdateWallet,
+			httptest.NewRequest(http.MethodPut, "/api/v1/wallets/1", testkit.JSONReader(s.T(), wallet.Request{
+				ID:         1,
+				UserID:     1,
+				UserName:   "Thirathawat",
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			})),
+			testkit.WithJSONContentType(),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusNotFound, rec.Code)
+		s.Equal(`{"message":"not found"}`, strings.TrimSpace(rec.Body.String()))
+	})
+
+	s.Run("given valid request should return 204", func() {
+		s.mockStore.EXPECT().
+			UpdateOne(&wallet.Wallet{
+				ID:         1,
+				UserID:     1,
+				UserName:   "Thirathawat",
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			}).
+			Return(nil)
+
+		rec := testkit.DoEchoRequest(
+			s.handler.UpdateWallet,
+			httptest.NewRequest(http.MethodPut, "/api/v1/wallets/1", testkit.JSONReader(s.T(), wallet.Request{
+				ID:         1,
+				UserID:     1,
+				UserName:   "Thirathawat",
+				WalletName: "Maz Savings",
+				WalletType: "Savings",
+				Balance:    100,
+			})),
+			testkit.WithJSONContentType(),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusNoContent, rec.Code)
 	})
 }
 

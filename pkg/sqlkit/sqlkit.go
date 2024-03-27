@@ -10,6 +10,7 @@ type queryType string
 const (
 	selectQueryType queryType = "SELECT"
 	insertQueryType queryType = "INSERT"
+	updateQueryType queryType = "UPDATE"
 )
 
 type QueryBuilder interface {
@@ -18,6 +19,8 @@ type QueryBuilder interface {
 	Where(condition, operation string, arg any) QueryBuilder
 
 	Insert() QueryBuilder
+	Update() QueryBuilder
+
 	Table(table string) QueryBuilder
 	Set(field string, arg any) QueryBuilder
 	Returning(fields ...string) QueryBuilder
@@ -66,6 +69,11 @@ func (b queryBuilder) Insert() QueryBuilder {
 	return b
 }
 
+func (b queryBuilder) Update() QueryBuilder {
+	b.queryType = updateQueryType
+	return b
+}
+
 func (b queryBuilder) Table(table string) QueryBuilder {
 	b.table = table
 	return b
@@ -107,6 +115,15 @@ func (b queryBuilder) Build() (string, []any) {
 		q.WriteString(")")
 		if b.returningClause != "" {
 			q.WriteString(" " + b.returningClause)
+		}
+	case updateQueryType:
+		q.WriteString(fmt.Sprintf("UPDATE %s SET ", b.table))
+		for i, key := range b.keys {
+			if i == 0 {
+				q.WriteString(fmt.Sprintf("%s = $%d", key, i+1))
+			} else {
+				q.WriteString(fmt.Sprintf(", %s = $%d ", key, i+1))
+			}
 		}
 	}
 

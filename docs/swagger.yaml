@@ -153,4 +153,41 @@ paths:
       summary: Create wallet
       tags:
       - wallet
+  /api/v1/wallets/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update wallet
+      parameters:
+      - description: wallet id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: wallet request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/wallet.Request'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.Err'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errs.Err'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Err'
+      summary: Update wallet
+      tags:
+      - wallet
 swagger: "2.0"

@@ -48,6 +48,20 @@ func (mr *MockStorerMockRecorder) Create(wallet interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockStorer)(nil).Create), wallet)
 }
 
+// UpdateOne mocks base method.
+func (m *MockStorer) UpdateOne(update *wallet.Wallet) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateOne", update)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateOne indicates an expected call of UpdateOne.
+func (mr *MockStorerMockRecorder) UpdateOne(update interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockStorer)(nil).UpdateOne), update)
+}
+
 // Wallets mocks base method.
 func (m *MockStorer) Wallets(filter wallet.Filter) ([]wallet.Wallet, error) {
 	m.ctrl.T.Helper()

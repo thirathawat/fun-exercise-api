@@ -3,6 +3,7 @@ package postgres
 import (
 	"time"
 
+	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/errs"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/sqlkit"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/timekit"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
@@ -41,6 +42,30 @@ func (p *Postgres) Create(wallet *wallet.Wallet) error {
 	}
 
 	wallet.ID = id
+
+	return nil
+}
+
+func (p *Postgres) UpdateOne(wallet *wallet.Wallet) error {
+	query, args := sqlkit.NewQueryBuilder().
+		Update().
+		Table(table).
+		Set("user_id", wallet.UserID).
+		Set("user_name", wallet.UserName).
+		Set("wallet_name", wallet.WalletName).
+		Set("wallet_type", wallet.WalletType).
+		Set("balance", wallet.Balance).
+		Where("id", "=", wallet.ID).
+		Build()
+
+	r, err := p.Db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+
+	if n, _ := r.RowsAffected(); n == 0 {
+		return errs.ErrNotFound
+	}
 
 	return nil
 }
