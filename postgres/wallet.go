@@ -108,9 +108,12 @@ func queryWallet(filter wallet.Filter) (query string, args []any) {
 		b = b.Where("wallet_type", "=", filter.WalletType)
 	}
 
+	if filter.UserID != "" {
+		b = b.Where("user_id", "=", filter.UserID)
+	}
+
 	return b.Build()
 }
-
 func (p *Postgres) DeleteOne(id int) error {
 	query, args := sqlkit.NewQueryBuilder().
 		Delete().
