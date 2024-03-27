@@ -1,12 +1,9 @@
-env: 
-	export $(cat .env | xargs)
-
 dev:
 	go run main.go
 
 test:
-	go test -v -race ./...
 	go vet ./...
+	go test -v -race ./...
 
 generate:
 	go mod tidy
