@@ -1,3 +1,6 @@
+env: 
+	export $(cat .env | xargs)
+
 dev:
 	go run main.go
 
