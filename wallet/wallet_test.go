@@ -15,7 +15,6 @@ import (
 	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet/mock_handler"
 	"github.com/golang/mock/gomock"
-
 	"github.com/stretchr/testify/suite"
 )
 
@@ -352,6 +351,63 @@ func (s *WalletTestSuite) TestUpdateWallet() {
 				Balance:    100,
 			})),
 			testkit.WithJSONContentType(),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusNoContent, rec.Code)
+	})
+}
+
+func (s *WalletTestSuite) TestDeleteWallet() {
+	s.Run("given unable to parse id should return 400 and error message", func() {
+		rec := testkit.DoEchoRequest(
+			s.handler.DeleteWallet,
+			httptest.NewRequest(http.MethodDelete, "/api/v1/wallets/invalid", nil),
+			testkit.WithParams(map[string]string{"id": "invalid"}),
+		)
+
+		s.Equal(http.StatusBadRequest, rec.Code)
+		s.Equal(`{"message":"strconv.Atoi: parsing \"invalid\": invalid syntax"}`, strings.TrimSpace(rec.Body.String()))
+	})
+
+	s.Run("given unable to delete wallet should return 500 and error message", func() {
+		s.mockStore.EXPECT().
+			DeleteOne(1).
+			Return(errors.New("error deleting wallet"))
+
+		rec := testkit.DoEchoRequest(
+			s.handler.DeleteWallet,
+			httptest.NewRequest(http.MethodDelete, "/api/v1/wallets/1", nil),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusInternalServerError, rec.Code)
+		s.Contains(rec.Body.String(), "error deleting wallet")
+	})
+
+	s.Run("given wallet not found should return 404 and error message", func() {
+		s.mockStore.EXPECT().
+			DeleteOne(1).
+			Return(errs.ErrNotFound)
+
+		rec := testkit.DoEchoRequest(
+			s.handler.DeleteWallet,
+			httptest.NewRequest(http.MethodDelete, "/api/v1/wallets/1", nil),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusNotFound, rec.Code)
+		s.Equal(`{"message":"not found"}`, strings.TrimSpace(rec.Body.String()))
+	})
+
+	s.Run("given valid request should return 204", func() {
+		s.mockStore.EXPECT().
+			DeleteOne(1).
+			Return(nil)
+
+		rec := testkit.DoEchoRequest(
+			s.handler.DeleteWallet,
+			httptest.NewRequest(http.MethodDelete, "/api/v1/wallets/1", nil),
 			testkit.WithParams(map[string]string{"id": "1"}),
 		)
 

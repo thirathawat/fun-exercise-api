@@ -48,6 +48,20 @@ func (mr *MockStorerMockRecorder) Create(wallet interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockStorer)(nil).Create), wallet)
 }
 
+// DeleteOne mocks base method.
+func (m *MockStorer) DeleteOne(id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteOne", id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteOne indicates an expected call of DeleteOne.
+func (mr *MockStorerMockRecorder) DeleteOne(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOne", reflect.TypeOf((*MockStorer)(nil).DeleteOne), id)
+}
+
 // UpdateOne mocks base method.
 func (m *MockStorer) UpdateOne(update *wallet.Wallet) error {
 	m.ctrl.T.Helper()

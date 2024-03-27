@@ -110,3 +110,22 @@ func queryWallet(filter wallet.Filter) (query string, args []any) {
 
 	return b.Build()
 }
+
+func (p *Postgres) DeleteOne(id int) error {
+	query, args := sqlkit.NewQueryBuilder().
+		Delete().
+		From(table).
+		Where("id", "=", id).
+		Build()
+
+	r, err := p.Db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+
+	if n, _ := r.RowsAffected(); n == 0 {
+		return errs.ErrNotFound
+	}
+
+	return nil
+}

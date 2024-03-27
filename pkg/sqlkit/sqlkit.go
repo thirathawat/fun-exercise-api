@@ -11,6 +11,7 @@ const (
 	selectQueryType queryType = "SELECT"
 	insertQueryType queryType = "INSERT"
 	updateQueryType queryType = "UPDATE"
+	deleteQueryType queryType = "DELETE"
 )
 
 type QueryBuilder interface {
@@ -20,6 +21,7 @@ type QueryBuilder interface {
 
 	Insert() QueryBuilder
 	Update() QueryBuilder
+	Delete() QueryBuilder
 
 	Table(table string) QueryBuilder
 	Set(field string, arg any) QueryBuilder
@@ -74,6 +76,11 @@ func (b queryBuilder) Update() QueryBuilder {
 	return b
 }
 
+func (b queryBuilder) Delete() QueryBuilder {
+	b.queryType = deleteQueryType
+	return b
+}
+
 func (b queryBuilder) Table(table string) QueryBuilder {
 	b.table = table
 	return b
@@ -125,6 +132,8 @@ func (b queryBuilder) Build() (string, []any) {
 				q.WriteString(fmt.Sprintf(", %s = $%d ", key, i+1))
 			}
 		}
+	case deleteQueryType:
+		q.WriteString(fmt.Sprintf("DELETE %s ", b.fromClause))
 	}
 
 	if b.whereClause != "" {

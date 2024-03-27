@@ -48,4 +48,16 @@ func TestQueryBuilder(t *testing.T) {
 		assert.Equal(t, "UPDATE users SET name = $1, age = $2 WHERE id = $3", query)
 		assert.Equal(t, []any{"John", 30, 1}, args)
 	})
+
+	t.Run("Delete", func(t *testing.T) {
+		builder := sqlkit.NewQueryBuilder().
+			Delete().
+			From("users").
+			Where("id", "=", 1)
+
+		query, args := builder.Build()
+
+		assert.Equal(t, "DELETE FROM users WHERE id = $1", query)
+		assert.Equal(t, []any{1}, args)
+	})
 }

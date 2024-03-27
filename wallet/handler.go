@@ -5,6 +5,7 @@ package wallet
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/errs"
 	"github.com/go-playground/validator/v10"
@@ -19,6 +20,7 @@ type Storer interface {
 	Create(wallet *Wallet) error
 	UpdateOne(update *Wallet) error
 	Wallets(filter Filter) ([]Wallet, error)
+	DeleteOne(id int) error
 }
 
 func New(db Storer) *Handler {
@@ -140,6 +142,36 @@ func (h *Handler) UpdateWallet(c echo.Context) error {
 		WalletType: req.WalletType,
 		Balance:    req.Balance,
 	}); err != nil {
+		if errors.Is(err, errs.ErrNotFound) {
+			return c.JSON(http.StatusNotFound, errs.New(err.Error()))
+		}
+
+		return c.JSON(http.StatusInternalServerError, errs.New(err.Error()))
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+// DeleteWallet
+//
+//	@Summary		Delete wallet
+//	@Description	Delete wallet
+//	@Tags			wallet
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"wallet id"
+//	@Success		204
+//	@Router			/api/v1/wallets/{id} [delete]
+//	@Failure		400	{object}	errs.Err
+//	@Failure		404	{object}	errs.Err
+//	@Failure		500	{object}	errs.Err
+func (h *Handler) DeleteWallet(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, errs.New(err.Error()))
+	}
+
+	if err := h.store.DeleteOne(id); err != nil {
 		if errors.Is(err, errs.ErrNotFound) {
 			return c.JSON(http.StatusNotFound, errs.New(err.Error()))
 		}
