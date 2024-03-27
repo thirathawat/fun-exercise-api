@@ -66,7 +66,7 @@ We've prepared a simple API, database schema for Wallets, and Swagger documentat
 - Create Swagger documentation for the API via `swag init`
 - `wallet/handler.go` - You'll see the comments pattern that is used to generate the Swagger documentation
 ```go
-// 	WalletHandler
+// 	GetAllWallets
 //	@Summary		Get all wallets
 //	@Description	Get all wallets
 //	@Tags			wallet
@@ -75,7 +75,7 @@ We've prepared a simple API, database schema for Wallets, and Swagger documentat
 //	@Success		200	{object}	Wallet
 //	@Router			/api/v1/wallets [get]
 //	@Failure		500	{object}	Err
-func (h *Handler) WalletHandler(c echo.Context) error {
+func (h *Handler) GetAllWallets(c echo.Context) error {
 	wallets, err := h.store.Wallets() // Query all wallets
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})

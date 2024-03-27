@@ -1,8 +1,11 @@
 package wallet
 
+//go:generate go run github.com/golang/mock/mockgen -source=./handler.go -destination=./mock_handler/mock_handler.go -package=mock_handler
+
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
@@ -21,7 +24,8 @@ type Err struct {
 	Message string `json:"message"`
 }
 
-// WalletHandler
+// GetAllWallets
+//
 //	@Summary		Get all wallets
 //	@Description	Get all wallets
 //	@Tags			wallet
@@ -30,7 +34,7 @@ type Err struct {
 //	@Success		200	{object}	Wallet
 //	@Router			/api/v1/wallets [get]
 //	@Failure		500	{object}	Err
-func (h *Handler) WalletHandler(c echo.Context) error {
+func (h *Handler) GetAllWallets(c echo.Context) error {
 	wallets, err := h.store.Wallets()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
