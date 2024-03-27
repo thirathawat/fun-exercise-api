@@ -28,6 +28,19 @@ const docTemplate = `{
                     "wallet"
                 ],
                 "summary": "Get all wallets",
+                "parameters": [
+                    {
+                        "enum": [
+                            "Savings",
+                            "Credit Card",
+                            "Crypto Wallet"
+                        ],
+                        "type": "string",
+                        "description": "wallet type",
+                        "name": "wallet_type",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

@@ -1,9 +1,13 @@
 package postgres
 
 import (
-	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
 	"time"
+
+	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/sqlkit"
+	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
 )
+
+const table = "user_wallet"
 
 type Wallet struct {
 	ID         int       `postgres:"id"`
@@ -15,8 +19,9 @@ type Wallet struct {
 	CreatedAt  time.Time `postgres:"created_at"`
 }
 
-func (p *Postgres) Wallets() ([]wallet.Wallet, error) {
-	rows, err := p.Db.Query("SELECT * FROM user_wallet")
+func (p *Postgres) Wallets(filter wallet.Filter) ([]wallet.Wallet, error) {
+	query, args := queryWallet(filter)
+	rows, err := p.Db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -44,4 +49,13 @@ func (p *Postgres) Wallets() ([]wallet.Wallet, error) {
 		})
 	}
 	return wallets, nil
+}
+
+func queryWallet(filter wallet.Filter) (query string, args []any) {
+	b := sqlkit.NewQueryBuilder().Select("*").From(table)
+	if filter.WalletType != "" {
+		b = b.Where("wallet_type", "=", filter.WalletType)
+	}
+
+	return b.Build()
 }

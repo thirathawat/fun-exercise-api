@@ -35,16 +35,16 @@ func (m *MockStorer) EXPECT() *MockStorerMockRecorder {
 }
 
 // Wallets mocks base method.
-func (m *MockStorer) Wallets() ([]wallet.Wallet, error) {
+func (m *MockStorer) Wallets(filter wallet.Filter) ([]wallet.Wallet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Wallets")
+	ret := m.ctrl.Call(m, "Wallets", filter)
 	ret0, _ := ret[0].([]wallet.Wallet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Wallets indicates an expected call of Wallets.
-func (mr *MockStorerMockRecorder) Wallets() *gomock.Call {
+func (mr *MockStorerMockRecorder) Wallets(filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Wallets", reflect.TypeOf((*MockStorer)(nil).Wallets))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Wallets", reflect.TypeOf((*MockStorer)(nil).Wallets), filter)
 }

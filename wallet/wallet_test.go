@@ -37,7 +37,7 @@ func (s *WalletTestSuite) TestGetAllWallets() {
 
 	s.Run("given unable to get wallets should return 500 and error message", func() {
 		s.mockStore.EXPECT().
-			Wallets().
+			Wallets(wallet.Filter{}).
 			Return(nil, errors.New("error getting wallets"))
 
 		rec := testkit.DoEchoRequest(
@@ -51,7 +51,7 @@ func (s *WalletTestSuite) TestGetAllWallets() {
 
 	s.Run("given user able to getting wallet should return list of wallets", func() {
 		s.mockStore.EXPECT().
-			Wallets().
+			Wallets(wallet.Filter{}).
 			Return(wallets, nil)
 
 		rec := testkit.DoEchoRequest(
@@ -61,6 +61,20 @@ func (s *WalletTestSuite) TestGetAllWallets() {
 
 		s.Equal(http.StatusOK, rec.Code)
 		s.Equal(fmt.Sprintln(testkit.JSONStringify(s.T(), wallets)), rec.Body.String())
+	})
+
+	s.Run("given wallet type filter should return list of wallets with filter", func() {
+		s.mockStore.EXPECT().
+			Wallets(wallet.Filter{WalletType: "Savings"}).
+			Return(wallets[:1], nil)
+
+		rec := testkit.DoEchoRequest(
+			s.handler.GetAllWallets,
+			httptest.NewRequest(http.MethodGet, "/api/v1/wallets?wallet_type=Savings", nil),
+		)
+
+		s.Equal(http.StatusOK, rec.Code)
+		s.Equal(fmt.Sprintln(testkit.JSONStringify(s.T(), wallets[:1])), rec.Body.String())
 	})
 }
 

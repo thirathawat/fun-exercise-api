@@ -14,7 +14,7 @@ type Handler struct {
 }
 
 type Storer interface {
-	Wallets() ([]Wallet, error)
+	Wallets(filter Filter) ([]Wallet, error)
 }
 
 func New(db Storer) *Handler {
@@ -23,16 +23,19 @@ func New(db Storer) *Handler {
 
 // GetAllWallets
 //
-//	@Summary		Get all wallets
-//	@Description	Get all wallets
-//	@Tags			wallet
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	Wallet
-//	@Router			/api/v1/wallets [get]
-//	@Failure		500	{object}	errs.Err
+//		@Summary		Get all wallets
+//		@Description	Get all wallets
+//		@Tags			wallet
+//	 	@Param			wallet_type	query	string	false	"wallet type" Enums(Savings, Credit Card, Crypto Wallet)
+//		@Accept			json
+//		@Produce		json
+//		@Success		200	{object}	Wallet
+//		@Router			/api/v1/wallets [get]
+//		@Failure		500	{object}	errs.Err
 func (h *Handler) GetAllWallets(c echo.Context) error {
-	wallets, err := h.store.Wallets()
+	wallets, err := h.store.Wallets(Filter{
+		WalletType: c.QueryParam("wallet_type"),
+	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errs.New(err.Error()))
 	}
