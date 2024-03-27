@@ -41,3 +41,26 @@ func (h *Handler) GetAllWallets(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, wallets)
 }
+
+// GetUserWallets
+//
+//		@Summary		Get user wallets
+//		@Description	Get user wallets
+//		@Tags			wallet
+//	 	@Param			id	path	string	true	"user id"
+//	 	@Param			wallet_type	query	string	false	"wallet type" Enums(Savings, Credit Card, Crypto Wallet)
+//		@Accept			json
+//		@Produce		json
+//		@Success		200	{object}	Wallet
+//		@Router			/api/v1/users/{id}/wallets [get]
+//		@Failure		500	{object}	errs.Err
+func (h *Handler) GetUserWallets(c echo.Context) error {
+	wallets, err := h.store.Wallets(Filter{
+		UserID:     c.Param("id"),
+		WalletType: c.QueryParam("wallet_type"),
+	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errs.New(err.Error()))
+	}
+	return c.JSON(http.StatusOK, wallets)
+}

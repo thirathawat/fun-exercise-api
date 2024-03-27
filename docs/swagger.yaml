@@ -35,6 +35,39 @@ info:
   title: Wallet API
   version: "1.0"
 paths:
+  /api/v1/users/{id}/wallets:
+    get:
+      consumes:
+      - application/json
+      description: Get user wallets
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: wallet type
+        enum:
+        - Savings
+        - Credit Card
+        - Crypto Wallet
+        in: query
+        name: wallet_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wallet.Wallet'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Err'
+      summary: Get user wallets
+      tags:
+      - wallet
   /api/v1/wallets:
     get:
       consumes:

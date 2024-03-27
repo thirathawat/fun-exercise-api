@@ -9,10 +9,36 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func DoEchoRequest(handler echo.HandlerFunc, req *http.Request) *httptest.ResponseRecorder {
+type doEchoRequestOptionFunc func(*doEchoRequestOption)
+
+type doEchoRequestOption struct {
+	params map[string]string
+}
+
+func WithParams(params map[string]string) doEchoRequestOptionFunc {
+	return func(o *doEchoRequestOption) {
+		o.params = params
+	}
+}
+
+func bindOptions(opts []doEchoRequestOptionFunc) *doEchoRequestOption {
+	o := &doEchoRequestOption{}
+	for _, opt := range opts {
+		opt(o)
+	}
+	return o
+}
+
+func DoEchoRequest(handler echo.HandlerFunc, req *http.Request, opts ...doEchoRequestOptionFunc) *httptest.ResponseRecorder {
+	o := bindOptions(opts)
 	e := echo.New()
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
+
+	for k, v := range o.params {
+		c.SetParamNames(k)
+		c.SetParamValues(v)
+	}
 
 	handler(c)
 

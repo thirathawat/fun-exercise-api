@@ -8,6 +8,55 @@
     },
     "host": "localhost:1323",
     "paths": {
+        "/api/v1/users/{id}/wallets": {
+            "get": {
+                "description": "Get user wallets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "summary": "Get user wallets",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "Savings",
+                            "Credit Card",
+                            "Crypto Wallet"
+                        ],
+                        "type": "string",
+                        "description": "wallet type",
+                        "name": "wallet_type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wallet.Wallet"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Err"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/wallets": {
             "get": {
                 "description": "Get all wallets",

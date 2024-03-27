@@ -13,5 +13,6 @@ type Wallet struct {
 }
 
 type Filter struct {
+	UserID     string
 	WalletType string
 }

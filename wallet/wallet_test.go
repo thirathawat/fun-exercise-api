@@ -78,6 +78,55 @@ func (s *WalletTestSuite) TestGetAllWallets() {
 	})
 }
 
+func (s *WalletTestSuite) TestGetUserWallets() {
+	wallets := newWallets()
+
+	s.Run("given unable to get wallets should return 500 and error message", func() {
+		s.mockStore.EXPECT().
+			Wallets(wallet.Filter{UserID: "1"}).
+			Return(nil, errors.New("error getting wallets"))
+
+		rec := testkit.DoEchoRequest(
+			s.handler.GetUserWallets,
+			httptest.NewRequest(http.MethodGet, "/api/v1/users/1/wallets", nil),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusInternalServerError, rec.Code)
+		s.Contains(rec.Body.String(), "error getting wallets")
+	})
+
+	s.Run("given user able to getting wallet should return list of wallets", func() {
+		s.mockStore.EXPECT().
+			Wallets(wallet.Filter{UserID: "1"}).
+			Return(wallets, nil)
+
+		rec := testkit.DoEchoRequest(
+			s.handler.GetUserWallets,
+			httptest.NewRequest(http.MethodGet, "/api/v1/users/1/wallets", nil),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusOK, rec.Code)
+		s.Equal(fmt.Sprintln(testkit.JSONStringify(s.T(), wallets)), rec.Body.String())
+	})
+
+	s.Run("given wallet type filter should return list of wallets with filter", func() {
+		s.mockStore.EXPECT().
+			Wallets(wallet.Filter{UserID: "1", WalletType: "Savings"}).
+			Return(wallets[:1], nil)
+
+		rec := testkit.DoEchoRequest(
+			s.handler.GetUserWallets,
+			httptest.NewRequest(http.MethodGet, "/api/v1/users/1/wallets?wallet_type=Savings", nil),
+			testkit.WithParams(map[string]string{"id": "1"}),
+		)
+
+		s.Equal(http.StatusOK, rec.Code)
+		s.Equal(fmt.Sprintln(testkit.JSONStringify(s.T(), wallets[:1])), rec.Body.String())
+	})
+}
+
 func newWallets() []wallet.Wallet {
 	return []wallet.Wallet{
 		{
