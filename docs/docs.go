@@ -38,7 +38,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/wallet.Err"
+                            "$ref": "#/definitions/errs.Err"
                         }
                     }
                 }
@@ -46,7 +46,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "wallet.Err": {
+        "errs.Err": {
             "type": "object",
             "properties": {
                 "message": {

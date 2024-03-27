@@ -5,6 +5,7 @@ package wallet
 import (
 	"net/http"
 
+	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/errs"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,10 +21,6 @@ func New(db Storer) *Handler {
 	return &Handler{store: db}
 }
 
-type Err struct {
-	Message string `json:"message"`
-}
-
 // GetAllWallets
 //
 //	@Summary		Get all wallets
@@ -33,11 +30,11 @@ type Err struct {
 //	@Produce		json
 //	@Success		200	{object}	Wallet
 //	@Router			/api/v1/wallets [get]
-//	@Failure		500	{object}	Err
+//	@Failure		500	{object}	errs.Err
 func (h *Handler) GetAllWallets(c echo.Context) error {
 	wallets, err := h.store.Wallets()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+		return c.JSON(http.StatusInternalServerError, errs.New(err.Error()))
 	}
 	return c.JSON(http.StatusOK, wallets)
 }
