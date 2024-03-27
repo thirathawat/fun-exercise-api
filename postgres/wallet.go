@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/sqlkit"
+	"github.com/KKGo-Software-engineering/fun-exercise-api/pkg/timekit"
 	"github.com/KKGo-Software-engineering/fun-exercise-api/wallet"
 )
 
@@ -17,6 +18,31 @@ type Wallet struct {
 	WalletType string    `postgres:"wallet_type"`
 	Balance    float64   `postgres:"balance"`
 	CreatedAt  time.Time `postgres:"created_at"`
+}
+
+func (p *Postgres) Create(wallet *wallet.Wallet) error {
+	var id int
+
+	wallet.CreatedAt = timekit.Now()
+	query, args := sqlkit.NewQueryBuilder().
+		Insert().
+		Table(table).
+		Set("user_id", wallet.UserID).
+		Set("user_name", wallet.UserName).
+		Set("wallet_name", wallet.WalletName).
+		Set("wallet_type", wallet.WalletType).
+		Set("balance", wallet.Balance).
+		Set("created_at", wallet.CreatedAt).
+		Returning("id").
+		Build()
+
+	if err := p.Db.QueryRow(query, args...).Scan(&id); err != nil {
+		return err
+	}
+
+	wallet.ID = id
+
+	return nil
 }
 
 func (p *Postgres) Wallets(filter wallet.Filter) ([]wallet.Wallet, error) {

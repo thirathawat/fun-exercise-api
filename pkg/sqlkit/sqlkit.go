@@ -5,28 +5,49 @@ import (
 	"strings"
 )
 
+type queryType string
+
+const (
+	selectQueryType queryType = "SELECT"
+	insertQueryType queryType = "INSERT"
+)
+
 type QueryBuilder interface {
 	Select(fields ...string) QueryBuilder
 	From(table string) QueryBuilder
 	Where(condition, operation string, arg any) QueryBuilder
+
+	Insert() QueryBuilder
+	Table(table string) QueryBuilder
+	Set(field string, arg any) QueryBuilder
+	Returning(fields ...string) QueryBuilder
+
 	Build() (string, []any)
 }
 
 type queryBuilder struct {
-	selectClause string
-	fromClause   string
-	whereClause  string
+	queryType queryType
 
+	selectClause    string
+	fromClause      string
+	whereClause     string
+	returningClause string
+
+	table string
+
+	keys []string
 	args []any
 }
 
 func (b queryBuilder) Select(fields ...string) QueryBuilder {
+	b.queryType = selectQueryType
 	b.selectClause = "SELECT " + strings.Join(fields, ", ")
 	return b
 }
 
 func (b queryBuilder) From(table string) QueryBuilder {
 	b.fromClause = "FROM " + table
+	b.table = table
 	return b
 }
 
@@ -40,9 +61,54 @@ func (b queryBuilder) Where(condition, operation string, arg any) QueryBuilder {
 	return b
 }
 
+func (b queryBuilder) Insert() QueryBuilder {
+	b.queryType = insertQueryType
+	return b
+}
+
+func (b queryBuilder) Table(table string) QueryBuilder {
+	b.table = table
+	return b
+}
+
+func (b queryBuilder) Set(field string, arg any) QueryBuilder {
+	b.keys = append(b.keys, field)
+	b.args = append(b.args, arg)
+	return b
+}
+
+func (b queryBuilder) Returning(fields ...string) QueryBuilder {
+	b.returningClause = "RETURNING " + strings.Join(fields, ", ")
+	return b
+}
+
 func (b queryBuilder) Build() (string, []any) {
 	var q strings.Builder
-	q.WriteString(fmt.Sprintf("%s %s ", b.selectClause, b.fromClause))
+	switch b.queryType {
+	case selectQueryType:
+		q.WriteString(fmt.Sprintf("%s %s ", b.selectClause, b.fromClause))
+	case insertQueryType:
+		q.WriteString(fmt.Sprintf("INSERT INTO %s (", b.table))
+		for i, key := range b.keys {
+			if i == 0 {
+				q.WriteString(key)
+			} else {
+				q.WriteString(fmt.Sprintf(", %s", key))
+			}
+		}
+		q.WriteString(") VALUES (")
+		for i := range b.keys {
+			if i == 0 {
+				q.WriteString(fmt.Sprintf("$%d", i+1))
+			} else {
+				q.WriteString(fmt.Sprintf(", $%d", i+1))
+			}
+		}
+		q.WriteString(")")
+		if b.returningClause != "" {
+			q.WriteString(" " + b.returningClause)
+		}
+	}
 
 	if b.whereClause != "" {
 		q.WriteString(b.whereClause)
@@ -57,6 +123,7 @@ func (b queryBuilder) idx() int {
 
 func NewQueryBuilder() QueryBuilder {
 	return queryBuilder{
+		keys: make([]string, 0),
 		args: make([]any, 0),
 	}
 }

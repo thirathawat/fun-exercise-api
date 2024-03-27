@@ -1,7 +1,9 @@
 package testkit
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,12 +14,19 @@ import (
 type doEchoRequestOptionFunc func(*doEchoRequestOption)
 
 type doEchoRequestOption struct {
-	params map[string]string
+	params      map[string]string
+	contentType string
 }
 
 func WithParams(params map[string]string) doEchoRequestOptionFunc {
 	return func(o *doEchoRequestOption) {
 		o.params = params
+	}
+}
+
+func WithJSONContentType() doEchoRequestOptionFunc {
+	return func(o *doEchoRequestOption) {
+		o.contentType = echo.MIMEApplicationJSON
 	}
 }
 
@@ -40,6 +49,10 @@ func DoEchoRequest(handler echo.HandlerFunc, req *http.Request, opts ...doEchoRe
 		c.SetParamValues(v)
 	}
 
+	if o.contentType != "" {
+		c.Request().Header.Set(echo.HeaderContentType, o.contentType)
+	}
+
 	handler(c)
 
 	return rec
@@ -52,4 +65,9 @@ func JSONStringify(t *testing.T, v any) string {
 		t.Fatalf("unable to marshal json: %v", err)
 	}
 	return string(b)
+}
+
+func JSONReader(t *testing.T, v any) io.Reader {
+	t.Helper()
+	return bytes.NewReader([]byte(JSONStringify(t, v)))
 }

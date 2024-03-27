@@ -4,6 +4,34 @@ definitions:
       message:
         type: string
     type: object
+  wallet.Request:
+    properties:
+      balance:
+        example: 100
+        type: number
+      user_id:
+        example: 1
+        type: integer
+      user_name:
+        example: John Doe
+        type: string
+      wallet_name:
+        example: John's Wallet
+        type: string
+      wallet_type:
+        enum:
+        - Savings
+        - Credit Card
+        - Crypto Wallet
+        example: Credit Card
+        type: string
+    required:
+    - balance
+    - user_id
+    - user_name
+    - wallet_name
+    - wallet_type
+    type: object
   wallet.Wallet:
     properties:
       balance:
@@ -94,6 +122,35 @@ paths:
           schema:
             $ref: '#/definitions/errs.Err'
       summary: Get all wallets
+      tags:
+      - wallet
+    post:
+      consumes:
+      - application/json
+      description: Create wallet
+      parameters:
+      - description: wallet request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/wallet.Request'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/wallet.Wallet'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.Err'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errs.Err'
+      summary: Create wallet
       tags:
       - wallet
 swagger: "2.0"

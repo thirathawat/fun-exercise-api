@@ -16,3 +16,12 @@ type Filter struct {
 	UserID     string
 	WalletType string
 }
+
+type Request struct {
+	ID         int     `json:"-" example:"1" param:"id"`
+	UserID     int     `json:"user_id" example:"1" validate:"required"`
+	UserName   string  `json:"user_name" example:"John Doe" validate:"required"`
+	WalletName string  `json:"wallet_name" example:"John's Wallet" validate:"required"`
+	WalletType string  `json:"wallet_type" example:"Credit Card" validate:"required,oneof='Savings' 'Credit Card' 'Crypto Wallet'"`
+	Balance    float64 `json:"balance" example:"100.00" validate:"required"`
+}

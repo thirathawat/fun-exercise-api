@@ -34,6 +34,20 @@ func (m *MockStorer) EXPECT() *MockStorerMockRecorder {
 	return m.recorder
 }
 
+// Create mocks base method.
+func (m *MockStorer) Create(wallet *wallet.Wallet) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", wallet)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockStorerMockRecorder) Create(wallet interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockStorer)(nil).Create), wallet)
+}
+
 // Wallets mocks base method.
 func (m *MockStorer) Wallets(filter wallet.Filter) ([]wallet.Wallet, error) {
 	m.ctrl.T.Helper()

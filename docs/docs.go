@@ -104,6 +104,50 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Create wallet",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "wallet"
+                ],
+                "summary": "Create wallet",
+                "parameters": [
+                    {
+                        "description": "wallet request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wallet.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/wallet.Wallet"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Err"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Err"
+                        }
+                    }
+                }
             }
         }
     },
@@ -113,6 +157,43 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "wallet.Request": {
+            "type": "object",
+            "required": [
+                "balance",
+                "user_id",
+                "user_name",
+                "wallet_name",
+                "wallet_type"
+            ],
+            "properties": {
+                "balance": {
+                    "type": "number",
+                    "example": 100
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "wallet_name": {
+                    "type": "string",
+                    "example": "John's Wallet"
+                },
+                "wallet_type": {
+                    "type": "string",
+                    "enum": [
+                        "Savings",
+                        "Credit Card",
+                        "Crypto Wallet"
+                    ],
+                    "example": "Credit Card"
                 }
             }
         },
